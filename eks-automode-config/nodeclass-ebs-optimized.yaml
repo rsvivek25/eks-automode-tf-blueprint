@@ -4,7 +4,7 @@
 #   ${cluster_name} - EKS cluster name from variables
 #   ${vpc_id} - VPC ID where the cluster is deployed
 #   ${additional_sg_id} - Additional security group ID (if created)
-#   ${subnet_ids} - JSON array of subnet IDs
+#   subnet_ids - List of subnet IDs (looped over to create selector terms)
 apiVersion: eks.amazonaws.com/v1
 kind: NodeClass
 metadata:
