@@ -268,12 +268,6 @@ variable "cloudwatch_log_group_class" {
   }
 }
 
-variable "enable_cluster_creator_admin_permissions" {
-  description = "Enable cluster creator admin permissions"
-  type        = bool
-  default     = true
-}
-
 variable "enable_default_node_pools" {
   description = <<-EOT
     Control which default EKS Auto Mode node pools to enable.
