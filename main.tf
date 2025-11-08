@@ -92,7 +92,7 @@ module "eks" {
   version = "~> 21.8"
 
   name             = var.cluster_name
-  cluster_version  = var.cluster_version
+  kubernetes_version  = var.cluster_version
 
   # EKS Upgrade Policy - Standard or Extended Support
   # Standard: 14 months of support (free)
@@ -129,7 +129,7 @@ module "eks" {
 
   # Enable ARC Zonal Shift for improved availability
   # Allows AWS to automatically shift traffic away from impaired AZs
-  zonal_shift = var.enable_zonal_shift ? {
+  zonal_shift_config = var.enable_zonal_shift ? {
     enabled = true
   } : {}
 
@@ -143,8 +143,8 @@ module "eks" {
 
   # Control plane logging to CloudWatch
   enabled_log_types              = var.enable_cluster_control_plane_logging ? var.cluster_enabled_log_types : []
-  cloudwatch_log_group_retention = var.cloudwatch_log_group_retention_in_days
-  cloudwatch_log_group_kms_key   = var.cloudwatch_log_group_kms_key_id
+  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
+  cloudwatch_log_group_kms_key_id   = var.cloudwatch_log_group_kms_key_id
   cloudwatch_log_group_class     = var.cloudwatch_log_group_class
 
   # Access entries for custom node classes
