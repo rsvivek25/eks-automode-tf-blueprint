@@ -91,8 +91,8 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.8"
 
-  name    = var.cluster_name
-  version = var.cluster_version
+  name             = var.cluster_name
+  cluster_version  = var.cluster_version
 
   # EKS Upgrade Policy - Standard or Extended Support
   # Standard: 14 months of support (free)
