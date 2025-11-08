@@ -5,30 +5,21 @@
 
 # AWS Configuration
 aws_region   = "us-east-1"
-cluster_name = "eks-blueprint-cluster"
+cluster_name = "eks-auto-cluster"
 
 # Existing VPC Configuration
 # Replace with your actual VPC ID
 vpc_id = "vpc-0457de39c6afcb5c5"
 
-# OPTION 1 (RECOMMENDED): Explicitly specify private subnet IDs
+# Private Subnet IDs (REQUIRED)
 # Subnets must be in at least 2 different Availability Zones
+# These subnets will be automatically tagged with "kubernetes.io/role/{cluster_name}" = "1"
+# for discovery by NodeClass and other Kubernetes resources
 private_subnet_ids = [
   "subnet-09e629910c9529eb8",  # us-east-1a (private subnet)
   "subnet-08065b66a7cb1795b",  # us-east-1b (private subnet)
   "subnet-089e4b2476ba9754a",  # us-east-1c (private subnet) - optional but recommended
 ]
-
-# OPTION 2 (LEGACY): Use tag-based subnet discovery
-# Only used if private_subnet_ids is empty []
-# Uncomment below if you prefer automatic subnet discovery via tags
-# private_subnet_ids = []
-# private_subnet_tags = {
-#   "kubernetes.io/role/internal-elb" = "1"
-#   # Or use custom tags:
-#   # "Tier" = "private"
-#   # "Name" = "*private*"
-# }
 
 # Cluster Configuration
 cluster_version = "1.33"

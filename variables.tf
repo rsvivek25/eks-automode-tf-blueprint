@@ -139,20 +139,13 @@ variable "private_subnet_ids" {
   description = <<-EOT
     List of private subnet IDs to use for the EKS cluster.
     Must be in at least 2 different Availability Zones.
-    Leave empty to use tag-based subnet discovery (legacy method).
+    These subnets will be automatically tagged with "kubernetes.io/role/{cluster_name}" = "1" for discovery.
   EOT
   type        = list(string)
-  default     = []
-}
-
-variable "private_subnet_tags" {
-  description = <<-EOT
-    Tags to identify private subnets in the existing VPC (used only if private_subnet_ids is empty).
-    This is the legacy method - using explicit private_subnet_ids is recommended.
-  EOT
-  type        = map(string)
-  default = {
-    "kubernetes.io/role/internal-elb" = "1"
+  
+  validation {
+    condition     = length(var.private_subnet_ids) >= 2
+    error_message = "At least 2 private subnet IDs are required for high availability across multiple Availability Zones."
   }
 }
 

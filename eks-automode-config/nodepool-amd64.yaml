@@ -33,7 +33,7 @@ spec:
           operator: Gt
           values: ["4"]
       nodeClassRef:
-        name: ebs-optimized
+        name: basic
         group: eks.amazonaws.com
         kind: NodeClass
   limits:

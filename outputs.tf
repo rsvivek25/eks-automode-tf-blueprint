@@ -183,5 +183,5 @@ output "vpc_id" {
 
 output "private_subnet_ids" {
   description = "List of private subnet IDs used by the EKS cluster"
-  value       = local.subnet_ids
+  value       = var.private_subnet_ids
 }

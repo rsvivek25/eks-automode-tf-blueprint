@@ -1,6 +1,16 @@
+# This file is templated by Terraform using templatefile()
+# The following variables are substituted at deployment time:
+#   ${subnet_ids} - JSON array of subnet IDs
 apiVersion: eks.amazonaws.com/v1
 kind: IngressClassParams
 metadata:
   name: alb
 spec:
+  # Internet-facing ALB - publicly accessible
+  # Use for public-facing applications and APIs
   scheme: internet-facing
+  
+  # Note: For internet-facing ALBs, you should use public subnets
+  # Uncomment and provide public subnet IDs separately if needed
+  # subnets:
+  #   ids: ["subnet-public-1", "subnet-public-2", "subnet-public-3"]

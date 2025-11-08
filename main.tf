@@ -54,25 +54,14 @@ data "aws_vpc" "existing" {
   id = var.vpc_id
 }
 
-# Subnet discovery via tags (only used if private_subnet_ids is empty)
-data "aws_subnets" "private" {
-  count = length(var.private_subnet_ids) == 0 ? 1 : 0
-
-  filter {
-    name   = "vpc-id"
-    values = [var.vpc_id]
-  }
-
-  tags = var.private_subnet_tags
-}
-
 ################################################################################
 # Local Variables
 ################################################################################
 
 locals {
-  # Use explicit subnet IDs if provided, otherwise discover via tags
-  subnet_ids = length(var.private_subnet_ids) > 0 ? var.private_subnet_ids : data.aws_subnets.private[0].ids
+  # Cluster-specific subnet discovery tag
+  subnet_discovery_tag_key   = "kubernetes.io/role/${var.cluster_name}"
+  subnet_discovery_tag_value = "1"
 
   # Determine which default node pools to enable based on variable value
   default_node_pools = (
@@ -81,6 +70,19 @@ locals {
     lower(var.enable_default_node_pools) == "system" ? ["system"] :
     [] # "none" or "false"
   )
+}
+
+################################################################################
+# Subnet Tagging
+# Automatically tag subnets with cluster-specific discovery tag
+################################################################################
+
+resource "aws_ec2_tag" "subnet_discovery" {
+  for_each = toset(var.private_subnet_ids)
+
+  resource_id = each.value
+  key         = local.subnet_discovery_tag_key
+  value       = local.subnet_discovery_tag_value
 }
 
 ################################################################################
@@ -110,7 +112,7 @@ module "eks" {
 
   # Use existing VPC
   vpc_id     = var.vpc_id
-  subnet_ids = local.subnet_ids
+  subnet_ids = var.private_subnet_ids
 
   # Enable cluster creator admin permissions
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions

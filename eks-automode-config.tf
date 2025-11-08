@@ -18,12 +18,16 @@ resource "kubectl_manifest" "storageclass_yamls" {
 
 ################################################################################
 # Apply ALB IngressClass and IngressClassParams
+# IngressClassParams YAML files are templated to use explicit subnet IDs
 ################################################################################
 
 resource "kubectl_manifest" "ingressclass_yamls" {
   for_each = var.enable_alb_ingressclass ? toset(var.ingressclass_yamls) : []
 
-  yaml_body = file("${path.module}/eks-automode-config/${each.value}")
+  # Use templatefile for IngressClassParams files, regular file for IngressClass
+  yaml_body = can(regex("Params", each.value)) ? templatefile("${path.module}/eks-automode-config/${each.value}", {
+    subnet_ids = jsonencode(var.private_subnet_ids)
+  }) : file("${path.module}/eks-automode-config/${each.value}")
 
   depends_on = [module.eks]
 }
@@ -33,6 +37,7 @@ resource "kubectl_manifest" "ingressclass_yamls" {
 # NodeClass YAML files are templated - Terraform substitutes variables:
 #   - ${node_iam_role_name} → actual IAM role name
 #   - ${cluster_name} → actual EKS cluster name
+#   - ${subnet_ids} → JSON array of subnet IDs
 ################################################################################
 
 resource "kubectl_manifest" "custom_nodeclass" {
@@ -42,6 +47,9 @@ resource "kubectl_manifest" "custom_nodeclass" {
   yaml_body = templatefile("${path.module}/eks-automode-config/${each.value}", {
     node_iam_role_name = aws_iam_role.custom_nodeclass_role.name
     cluster_name       = module.eks.cluster_name
+    vpc_id             = var.vpc_id
+    additional_sg_id   = var.create_additional_security_group ? aws_security_group.additional[0].id : ""
+    subnet_ids         = jsonencode(var.private_subnet_ids)
   })
 
   depends_on = [module.eks]

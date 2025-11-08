@@ -1,3 +1,6 @@
+# This file is templated by Terraform using templatefile()
+# The following variables are substituted at deployment time:
+#   ${subnet_ids} - JSON array of subnet IDs
 apiVersion: eks.amazonaws.com/v1
 kind: IngressClassParams
 metadata:
@@ -7,7 +10,6 @@ spec:
   # Use for admin panels, internal APIs, microservices
   scheme: internal
   
-  # Optional: Specify subnet tags for internal ALB placement
-  # subnets:
-  #   tags:
-  #     kubernetes.io/role/internal-elb: "1"
+  # Subnet selection - use explicit subnet IDs
+  subnets:
+    ids: ${subnet_ids}
