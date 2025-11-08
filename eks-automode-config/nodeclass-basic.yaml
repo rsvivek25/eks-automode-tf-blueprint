@@ -1,0 +1,28 @@
+# This file is templated by Terraform using templatefile()
+# The following variables are substituted at deployment time:
+#   ${node_iam_role_name} - IAM role name created for nodes
+#   ${cluster_name} - EKS cluster name from variables
+apiVersion: eks.amazonaws.com/v1
+kind: NodeClass
+metadata:
+  name: basic
+spec:
+  # IAM role for nodes (substituted by Terraform)
+  role: "${node_iam_role_name}"
+  
+  # Subnet selection based on cluster name tags
+  subnetSelectorTerms:
+    - tags:
+        Name: "${cluster_name}-private*"
+  
+  # Security group selection based on cluster name tags
+  securityGroupSelectorTerms:
+    - tags:
+        Name: "${cluster_name}-node"
+  ephemeralStorage:
+    size: "80Gi"    # Range: 1-9000Gi or 1-64000G or 1-58Ti or 1-64T
+    iops: 3000      # Range: 3000-16000
+    throughput: 125 # Range: 125-1000
+  tags:
+    Environment: "production"
+    Team: "platform"

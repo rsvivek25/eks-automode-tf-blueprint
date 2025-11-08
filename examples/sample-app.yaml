@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sample-app
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: httpd
+  namespace: sample-app
+spec:
+  serviceName: httpd
+  replicas: 2
+  selector:
+    matchLabels:
+      app: httpd
+  template:
+    metadata:
+      labels:
+        app: httpd
+    spec:
+      # Select AMD64 node pool
+      nodeSelector:
+        NodeGroupType: amd64
+      # Tolerate AMD64 taint
+      tolerations:
+        - key: amd64
+          effect: NoSchedule
+      containers:
+        - name: httpd
+          image: httpd:latest
+          ports:
+            - containerPort: 80
+              name: web
+          volumeMounts:
+            - name: httpd-logs
+              mountPath: /usr/local/apache2/logs
+  volumeClaimTemplates:
+    - metadata:
+        name: httpd-logs
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: auto-ebs-sc
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpd-service
+  namespace: sample-app
+spec:
+  selector:
+    app: httpd
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: httpd-ingress
+  namespace: sample-app
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: httpd-service
+                port:
+                  number: 80

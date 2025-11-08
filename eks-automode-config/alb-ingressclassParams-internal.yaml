@@ -1,0 +1,13 @@
+apiVersion: eks.amazonaws.com/v1
+kind: IngressClassParams
+metadata:
+  name: alb-internal
+spec:
+  # Internal ALB - accessible only within VPC
+  # Use for admin panels, internal APIs, microservices
+  scheme: internal
+  
+  # Optional: Specify subnet tags for internal ALB placement
+  # subnets:
+  #   tags:
+  #     kubernetes.io/role/internal-elb: "1"
