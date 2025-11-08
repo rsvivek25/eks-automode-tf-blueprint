@@ -14,15 +14,15 @@ provider "aws" {
 
 provider "helm" {
   kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+    host                   = module.eks.endpoint
+    cluster_ca_certificate = base64decode(module.eks.certificate_authority_data)
 
     exec {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       args = [
         "eks", "get-token",
-        "--cluster-name", module.eks.cluster_name,
+        "--cluster-name", module.eks.name,
         "--region", var.aws_region
       ]
     }
@@ -31,8 +31,8 @@ provider "helm" {
 
 provider "kubectl" {
   apply_retry_count      = 5
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  host                   = module.eks.endpoint
+  cluster_ca_certificate = base64decode(module.eks.certificate_authority_data)
   load_config_file       = false
 
   exec {
@@ -40,7 +40,7 @@ provider "kubectl" {
     command     = "aws"
     args = [
       "eks", "get-token",
-      "--cluster-name", module.eks.cluster_name,
+      "--cluster-name", module.eks.name,
       "--region", var.aws_region
     ]
   }
@@ -91,22 +91,22 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.8"
 
-  cluster_name    = var.cluster_name
-  cluster_version = var.cluster_version
+  name    = var.cluster_name
+  version = var.cluster_version
 
   # EKS Upgrade Policy - Standard or Extended Support
   # Standard: 14 months of support (free)
   # Extended: Up to 26 months of support (additional cost)
-  cluster_upgrade_policy = {
+  upgrade_policy = {
     support_type = var.cluster_upgrade_support_type
   }
 
   # Cluster endpoint access
-  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
-  cluster_endpoint_private_access = var.cluster_endpoint_private_access
+  endpoint_public_access  = var.cluster_endpoint_public_access
+  endpoint_private_access = var.cluster_endpoint_private_access
 
   # Additional CIDR blocks that can access the cluster endpoint
-  cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+  endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
 
   # Use existing VPC
   vpc_id     = var.vpc_id
@@ -116,36 +116,36 @@ module "eks" {
   enable_cluster_creator_admin_permissions = var.enable_cluster_creator_admin_permissions
 
   # Enable EKS Auto Mode
-  cluster_compute_config = {
+  compute_config = {
     enabled    = true
     node_pools = local.default_node_pools
   }
 
   # Envelope encryption for Kubernetes secrets
-  cluster_encryption_config = var.enable_secrets_encryption ? {
+  encryption_config = var.enable_secrets_encryption ? {
     provider_key_arn = var.kms_key_arn != "" ? var.kms_key_arn : aws_kms_key.eks[0].arn
     resources        = ["secrets"]
   } : {}
 
   # Enable ARC Zonal Shift for improved availability
   # Allows AWS to automatically shift traffic away from impaired AZs
-  zonal_shift_config = var.enable_zonal_shift ? {
+  zonal_shift = var.enable_zonal_shift ? {
     enabled = true
   } : {}
 
   # Cluster deletion protection
   # Prevents accidental deletion of the EKS cluster via AWS Console or CLI
   # You can still destroy via Terraform (Terraform manages this setting)
-  enable_cluster_deletion_protection = var.enable_cluster_deletion_protection
+  deletion_protection = var.enable_cluster_deletion_protection
 
   # Additional security groups to attach to the cluster
-  cluster_additional_security_group_ids = var.create_additional_security_group ? [aws_security_group.additional[0].id] : []
+  additional_security_group_ids = var.create_additional_security_group ? [aws_security_group.additional[0].id] : []
 
   # Control plane logging to CloudWatch
-  enabled_log_types = var.enable_cluster_control_plane_logging ? var.cluster_enabled_log_types : []
-  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
-  cloudwatch_log_group_kms_key_id        = var.cloudwatch_log_group_kms_key_id
-  cloudwatch_log_group_class             = var.cloudwatch_log_group_class
+  enabled_log_types              = var.enable_cluster_control_plane_logging ? var.cluster_enabled_log_types : []
+  cloudwatch_log_group_retention = var.cloudwatch_log_group_retention_in_days
+  cloudwatch_log_group_kms_key   = var.cloudwatch_log_group_kms_key_id
+  cloudwatch_log_group_class     = var.cloudwatch_log_group_class
 
   # Access entries for custom node classes
   access_entries = {
@@ -165,7 +165,7 @@ module "eks" {
   }
 
   # Cluster add-ons
-  cluster_addons = var.cluster_addons
+  addons = var.cluster_addons
 
   tags = var.tags
 }

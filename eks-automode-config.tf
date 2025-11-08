@@ -41,7 +41,7 @@ resource "kubectl_manifest" "custom_nodeclass" {
   # templatefile() replaces ${variable} placeholders in YAML with actual values
   yaml_body = templatefile("${path.module}/eks-automode-config/${each.value}", {
     node_iam_role_name = aws_iam_role.custom_nodeclass_role.name
-    cluster_name       = module.eks.cluster_name
+    cluster_name       = module.eks.name
   })
 
   depends_on = [module.eks]
