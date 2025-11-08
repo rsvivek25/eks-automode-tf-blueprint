@@ -89,7 +89,7 @@ locals {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.34"
+  version = "~> 21.8"
 
   cluster_name    = var.cluster_name
   cluster_version = var.cluster_version
@@ -142,7 +142,7 @@ module "eks" {
   cluster_additional_security_group_ids = var.create_additional_security_group ? [aws_security_group.additional[0].id] : []
 
   # Control plane logging to CloudWatch
-  enabled_cluster_log_types   = var.enable_cluster_control_plane_logging ? var.cluster_enabled_log_types : []
+  enabled_log_types = var.enable_cluster_control_plane_logging ? var.cluster_enabled_log_types : []
   cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
   cloudwatch_log_group_kms_key_id        = var.cloudwatch_log_group_kms_key_id
   cloudwatch_log_group_class             = var.cloudwatch_log_group_class
