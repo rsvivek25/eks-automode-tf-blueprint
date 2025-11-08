@@ -18,7 +18,7 @@ vpc_id = "vpc-0457de39c6afcb5c5"
 private_subnet_ids = [
   "subnet-09e629910c9529eb8",  # us-east-1a (private subnet)
   "subnet-08065b66a7cb1795b",  # us-east-1b (private subnet)
-  "subnet-089e4b2476ba9754a",  # us-east-1c (private subnet) - optional but recommended
+  "subnet-089e4b2476ba9754a"   # us-east-1c (private subnet) - optional but recommended
 ]
 
 # Cluster Configuration

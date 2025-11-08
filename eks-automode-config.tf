@@ -49,7 +49,7 @@ resource "kubectl_manifest" "custom_nodeclass" {
     cluster_name       = module.eks.cluster_name
     vpc_id             = var.vpc_id
     additional_sg_id   = var.create_additional_security_group ? aws_security_group.additional[0].id : ""
-    subnet_ids         = jsonencode(var.private_subnet_ids)
+    subnet_ids         = var.private_subnet_ids
   })
 
   depends_on = [module.eks]

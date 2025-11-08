@@ -15,7 +15,9 @@ spec:
   
   # Subnet selection - use explicit subnet IDs
   subnetSelectorTerms:
-    - id: ${subnet_ids}
+%{ for subnet_id in subnet_ids ~}
+  - id: ${subnet_id}
+%{ endfor ~}
   
   # Security group selection - use cluster security group and additional SG
   securityGroupSelectorTerms:
