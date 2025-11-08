@@ -125,13 +125,13 @@ module "eks" {
   encryption_config = var.enable_secrets_encryption ? {
     provider_key_arn = var.kms_key_arn != "" ? var.kms_key_arn : aws_kms_key.eks[0].arn
     resources        = ["secrets"]
-  } : {}
+  } : null
 
   # Enable ARC Zonal Shift for improved availability
   # Allows AWS to automatically shift traffic away from impaired AZs
   zonal_shift_config = var.enable_zonal_shift ? {
     enabled = true
-  } : {}
+  } : null
 
   # Cluster deletion protection
   # Prevents accidental deletion of the EKS cluster via AWS Console or CLI
